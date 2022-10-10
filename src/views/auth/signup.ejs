@@ -1,0 +1,39 @@
+<h1 class="title">Signup</h1>
+<div class="columns is-centered">
+  <div class="column is-6">
+    <div class="box has-text-left">
+      <form action="/auth/signup" method="post">
+        <div class="field">
+          <label class="label">Username</label>
+          <div class="control">
+            <input
+              class="input"
+              id="username"
+              name="username"
+              type="text"
+              autocomplete="username"
+              required
+              autofocus
+            />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Password</label>
+          <div class="control">
+            <input
+              class="input"
+              id="current-password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+        </div>
+
+        <input type="hidden" name="_csrf" value="" />
+        <button class="button is-dark" type="submit">Signup</button>
+      </form>
+    </div>
+  </div>
+</div>
