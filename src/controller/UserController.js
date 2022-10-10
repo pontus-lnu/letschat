@@ -1,6 +1,6 @@
 import LocalStrategy from "passport-local";
 import passport from "passport";
-import { UserModel } from "../model/User.js";
+import UserModel from "../model/User.js";
 
 const userModel = new UserModel();
 

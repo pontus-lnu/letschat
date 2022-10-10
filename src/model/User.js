@@ -20,7 +20,7 @@ class User {
   }
 }
 
-export class UserModel {
+export default class UserModel {
   async getUser(username) {
     const getUserResponse = await pool.query({
       text: "SELECT * FROM users WHERE username = $1",
