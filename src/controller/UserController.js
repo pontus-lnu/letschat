@@ -42,11 +42,12 @@ export class UserController {
     res.render("auth/login");
   }
 
-  isAuthenticated(req, res, next) {
+  async isAuthenticated(req, res, next) {
     if (!req.user) {
       res.redirect("/auth");
+    } else {
+      next();
     }
-    next();
   }
 
   showWelcome(req, res) {
