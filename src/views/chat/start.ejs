@@ -1,0 +1,33 @@
+<div id="chatcontainer" class="section" style="height: calc(100vh - 80px); overflow: scroll">
+  <% messages.forEach((message) => { %>
+
+  <div class="columns my-2">
+    <% if (message.getSender() === user.id) { %>
+    <div class="column is-narrow">
+      <i class="fas fa-user p-2"></i><%= user.username %>
+    </div>
+    <div class="column is-half">
+      <p><%= message.getTimestamp() %></p>
+      <div class="box content">
+        <p><%= message.getContent() %></p>
+      </div>
+    </div>
+    <div class="column"></div>
+    <% } else { %>
+    <div class="column"></div>
+    <div class="column is-half">
+      <p><%= message.getTimestamp() %></p>
+      <div class="box content">
+        <p><%= message.getContent() %></p>
+      </div>
+    </div>
+    <div class="column is-narrow">
+      <i class="fas fa-user p-2"></i><%= peer.username %>
+    </div>
+    <% } %>
+  </div>
+  <% }) %>
+  </div>
+  <%- include('input') %>
+</div>
+<script src="/js/scrolldown.js" type="text/javascript"></script>
