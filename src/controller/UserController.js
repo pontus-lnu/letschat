@@ -39,7 +39,7 @@ passport.deserializeUser(async function (username, done) {
 
 export class UserController {
   showLoginDialog(req, res) {
-    res.render("auth/login");
+    res.render("auth/login", { layout: "layouts/anonymous" });
   }
 
   async isAuthenticated(req, res, next) {
@@ -51,11 +51,11 @@ export class UserController {
   }
 
   showWelcome(req, res) {
-    res.render("auth");
+    res.render("auth", { layout: "layouts/anonymous" });
   }
 
   showsignupDialog(req, res) {
-    res.render("auth/signup");
+    res.render("auth/signup", { layout: "layouts/anonymous" });
   }
 
   async doLogin(req, res, next) {
