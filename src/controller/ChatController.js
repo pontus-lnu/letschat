@@ -6,10 +6,9 @@ const userModel = new UserModel();
 
 export class ChatController {
   async index(req, res) {
-    const viewdata = {
+    res.render("chat/welcome", {
       user: { username: req.user.getUsername(), id: req.user.getId() },
-    };
-    res.render("chat/index", { viewdata });
+    });
   }
 
   async startChat(req, res, next) {
@@ -18,7 +17,7 @@ export class ChatController {
       req.params.userId
     );
     const peer = await userModel.getUserById(req.params.userId);
-    res.render("chat/start", {
+    res.render("chat/index", {
       user: { username: req.user.getUsername(), id: req.user.getId() },
       peer: { username: peer.getUsername(), id: peer.getId() },
       messages: messages,
@@ -38,14 +37,14 @@ export class ChatController {
       );
       const peer = await userModel.getUserById(req.params.userId);
 
-      res.render("chat/start", {
+      res.render("chat/index", {
         user: { username: req.user.getUsername(), id: req.user.getId() },
         peer: { username: peer.getUsername(), id: peer.getId() },
         messages: messages,
       });
     } catch (e) {
       console.error(e);
-      res.render("chat/index");
+      res.render("chat/welcome");
     }
   }
 }

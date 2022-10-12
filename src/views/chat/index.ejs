@@ -1,6 +1,22 @@
-<div class="section">
-  <div class="container">
-    <h1 class="title">Welcome</h1>
-    <h1 class="subtitle">Please choose a participant to chat with</h1>
+<div id="chatcontainer" class="section" style="height: calc(100vh - 80px); overflow: scroll">
+  <% messages.forEach((message) => { %>
+
+    <% if (message.getSender() === user.id) { %>
+      <chat-message-sent sender="<%= user.username %>">
+        <span slot="content"><%= message.getContent() %></span>
+        <span slot="timestamp"><%= message.getTimestamp() %></span>
+      </chat-message-sent>
+    <% } else { %>
+      <chat-message-received sender="<%= peer.username %>">
+        <span slot="content"><%= message.getContent() %></span>
+        <span slot="timestamp"><%= message.getTimestamp() %></span>
+      </chat-message-received>
+
+    <% } %>
+  <% }) %>
   </div>
+  <%- include('input') %>
 </div>
+<script src="/js/components/chat-message-sent/index.js" type="module"></script>
+<script src="/js/components/chat-message-received/index.js" type="module"></script>
+<script src="/js/scrolldown.js" defer></script>

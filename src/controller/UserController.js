@@ -24,12 +24,12 @@ passport.use(
 );
 
 passport.serializeUser(function (user, done) {
-  done(null, user.getUsername());
+  done(null, { username: user.getUsername(), id: user.getId() });
 });
 
-passport.deserializeUser(async function (username, done) {
+passport.deserializeUser(async function (user, done) {
   try {
-    const userInDb = await userModel.getUser(username);
+    const userInDb = await userModel.getUser(user.username);
     return done(null, userInDb);
   } catch (e) {
     console.error(e);

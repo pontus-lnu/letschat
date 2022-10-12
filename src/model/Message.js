@@ -40,18 +40,25 @@ export default class MessageModel {
     const messagesResponse = await pool.query(lastTenMessages);
     const messages = [];
     messagesResponse.rows.forEach((row) => {
-      messages.push(
-        new Message(row.sender, row.receiver, row.content, row.timestamp)
-      );
+      messages.push(this.#createMessageFromRow(row));
     });
     return messages.sort((a, b) => a.getTimestamp() - b.getTimestamp());
   }
 
   async createMessage(sender, receiver, message) {
     const timestamp = getUnixTime(Date.now());
-    pool.query({
-      text: "INSERT INTO messages(sender,receiver,content,timestamp) VALUES ($1,$2,$3,$4)",
+    const createMessageResponse = await pool.query({
+      text: "INSERT INTO messages(sender,receiver,content,timestamp) VALUES ($1,$2,$3,$4) RETURNING *",
       values: [sender, receiver, message, timestamp],
     });
+    if (createMessageResponse.rows.length === 1) {
+      return this.#createMessageFromRow(createMessageResponse.rows[0]);
+    } else {
+      throw Error("Could not create message.");
+    }
+  }
+
+  #createMessageFromRow(row) {
+    return new Message(row.sender, row.receiver, row.content, row.timestamp);
   }
 }
