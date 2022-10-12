@@ -83,7 +83,6 @@ io.on("connection", (socket) => {
   socket.emit("users", users);
 
   socket.on("private message", async ({ content, socketId, userId }) => {
-    console.log(content, socketId, userId);
     const newMessage = await messageModel.createMessage(
       socket.userId,
       userId,

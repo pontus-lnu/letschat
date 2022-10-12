@@ -27,7 +27,7 @@ export class Message {
   }
 
   getTimestamp() {
-    return fromUnixTime(this.#timestamp);
+    return fromUnixTime(this.#timestamp).toString();
   }
 }
 
