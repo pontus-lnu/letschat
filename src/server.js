@@ -52,20 +52,28 @@ io.use((socket, next) => {
     return next(new Error("Unauthorized"));
   }
   const sessionId = socket.handshake.auth.sessionId;
-  if (sessionId && session.userId) {
+  console.log("sessionId", sessionId);
+  if (sessionId) {
+    console.log("grabbing session from store");
     const session = sessionStore.findSession(sessionId);
-    socket.sessionId = sessionId;
-    socket.userId = session.userId;
-    socket.username = socket.request.user.getUsername();
-    return next();
+    if (session) {
+      socket.sessionId = sessionId;
+      socket.userId = session.userId;
+      socket.username = socket.request.user.getUsername();
+      return next();
+    }
   }
   socket.username = socket.request.user.getUsername();
   socket.userId = socket.request.user.getId();
   socket.sessionId = randomId();
+  sessionStore.saveSession(socket.sessionId, {
+    userId: socket.userId,
+    username: socket.username,
+  });
   next();
 });
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   socket.emit("session", {
     sessionId: socket.sessionId,
     userId: socket.userId,
@@ -76,19 +84,38 @@ io.on("connection", (socket) => {
   const numberOfUsers = io.of("/").sockets.size;
   console.log(numberOfUsers, " user(s) connected.");
 
-  console.log(socket.username, "joining socket", socket.userId);
+  console.log(
+    socket.username,
+    "joining socket",
+    socket.userId,
+    "session",
+    socket.sessionId
+  );
   socket.join(socket.userId);
 
-  // Tell other users that we've connected
-  socket.broadcast.emit("user connected", {
-    socketId: socket.socketId,
-    userId: socket.userId,
-    username: socket.username,
-  });
+  const matchingSockets = await io.in(socket.userId).allSockets();
+  console.log(matchingSockets);
+  if (matchingSockets.size < 2) {
+    // Tell other users that we've connected
+    socket.broadcast.emit("user connected", {
+      socketId: socket.socketId,
+      userId: socket.userId,
+      username: socket.username,
+    });
+  }
 
   // Get list of all active users
   const users = [];
   for (let [id, socket] of io.of("/").sockets) {
+    let userExists = false;
+    users.forEach((user) => {
+      if (user.userId == socket.userId) {
+        userExists = true;
+      }
+    });
+    if (userExists) {
+      continue;
+    }
     users.push({
       socketId: socket.socketId,
       userId: socket.userId,
@@ -114,14 +141,16 @@ io.on("connection", (socket) => {
       });
   });
 
-  socket.on("disconnect", () => {
-    console.log(socket.username, "disconnected");
-    const numberOfUsers = io.of("/").sockets.size;
+  socket.on("disconnect", async () => {
+    // console.log(socket.username, "disconnected");
+    // const numberOfUsers = io.of("/").sockets.size;
     console.log(numberOfUsers, " user(s) connected.");
-    io.emit("user disconnected", {
-      userId: socket.socketId,
-      username: socket.username,
-    });
+    const matchingSockets = await io.in(socket.userId).allSockets();
+    console.log("matching sockets", matchingSockets);
+    const isDisconnected = matchingSockets.size === 0;
+    if (isDisconnected) {
+      socket.broadcast.emit("user disconnected", socket.userId);
+    }
   });
 });
 

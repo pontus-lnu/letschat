@@ -56,18 +56,22 @@ socket.on("session", ({ sessionId, userId, username }) => {
   socket.username = username;
 });
 
-socket.on("users", (users) => {
+socket.on("users", async (users) => {
   console.log("users", users);
-  for (let user of users) {
-    const li = document.createElement("li");
-    li.setAttribute("userid", user.userId);
-    li.addEventListener("click", selectUser);
-    const a = document.createElement("a");
-    a.innerText = user.username;
-    li.appendChild(a);
-    participantsContainer.appendChild(li);
+  for (let i = 0; i < users.length; i++) {
+    addUserToList(users[i].userId, users[i].username);
   }
 });
+
+const addUserToList = (userId, username) => {
+  const li = document.createElement("li");
+  li.setAttribute("userid", userId);
+  li.addEventListener("click", selectUser);
+  const a = document.createElement("a");
+  a.innerText = username;
+  li.appendChild(a);
+  participantsContainer.appendChild(li);
+};
 
 socket.on("user connected", (user) => {
   console.log("user connected", user);
@@ -80,11 +84,11 @@ socket.on("user connected", (user) => {
   participantsContainer.appendChild(li);
 });
 
-socket.on("user disconnected", (user) => {
-  console.log("user disconnected", user);
+socket.on("user disconnected", (userId) => {
+  console.log("user disconnected", userId);
   const users = participantsContainer.querySelectorAll("li");
   users.forEach((userInList) => {
-    if (userInList.getAttribute("userid") == user.userId) {
+    if (userInList.getAttribute("userid") == userId) {
       userInList.remove();
     }
   });
