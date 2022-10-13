@@ -46,14 +46,6 @@ io.use(wrap(sessionMiddleware));
 io.use(wrap(passport.initialize()));
 io.use(wrap(passport.session()));
 
-// io.use((socket, next) => {
-//   const username = socket.handshake.auth.username;
-//   if (!username) {
-//     return next(new Error("invalid username"));
-//   }
-//   socket.username = username;
-//   next();
-// });
 const sessionStore = new SessionStore();
 io.use((socket, next) => {
   if (!socket.request.user) {
@@ -84,8 +76,8 @@ io.on("connection", (socket) => {
   const numberOfUsers = io.of("/").sockets.size;
   console.log(numberOfUsers, " user(s) connected.");
 
-  console.log(socket.username, "joining socket", socket.userId.toString());
-  socket.join(socket.userId.toString());
+  console.log(socket.username, "joining socket", socket.userId);
+  socket.join(socket.userId);
 
   // Tell other users that we've connected
   socket.broadcast.emit("user connected", {

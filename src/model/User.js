@@ -23,7 +23,7 @@ class User {
   }
 
   getId() {
-    return this.#id;
+    return this.#id.toString();
   }
 }
 
