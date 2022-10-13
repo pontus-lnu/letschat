@@ -3,16 +3,21 @@ import "./chat-input.js";
 import "./chat-messages.js";
 import "./chat-message-sent.js";
 import "./chat-message-received.js";
+import "./chat-user.js";
 
 const template = document.createElement("template");
 template.innerHTML = `
 <link href="/css/bulma.min.css" rel="stylesheet">
   <section class="hero is-fullheight">
     <div class="columns">
-      <user-list></user-list>
+      <user-list id="user-list">
+
+
+      </user-list>
       <div class="column is-10 has-background-light">
         <chat-messages></chat-messages>
-        <chat-input id="chat-input"></chat-input>
+        <chat-input id="chat-input">
+        </chat-input>
       </div>
     </div>
   </section>
@@ -23,6 +28,7 @@ customElements.define(
   class extends HTMLElement {
     #socket;
     #chatinput;
+    #userlist;
 
     constructor() {
       super();
@@ -31,16 +37,20 @@ customElements.define(
         template.content.cloneNode(true)
       );
 
+      this.#addEventListeners();
+      this.#createWebsocketClient();
+      this.#addEventHandlers();
+    }
+
+    #addEventListeners = () => {
       this.#chatinput = this.shadowRoot.querySelector("#chat-input");
       this.#chatinput.addEventListener("lc-input-submitted", (event) => {
         console.log(event.detail);
       });
+      this.#userlist = this.shadowRoot.querySelector("#user-list");
+    };
 
-      this.#setupSocketClient();
-      this.#addEventHandlers();
-    }
-
-    #setupSocketClient = () => {
+    #createWebsocketClient = () => {
       this.#socket = io({ autoConnect: false });
       const sessionId = localStorage.getItem("sessionId");
       if (sessionId) {
@@ -53,6 +63,9 @@ customElements.define(
       this.#event();
       this.#users();
       this.#userConnect();
+      this.#userDisconnect();
+      this.#getMessages();
+      this.#privateMessage();
     };
 
     #event = () => {
@@ -68,9 +81,8 @@ customElements.define(
     #users = () => {
       this.#socket.on("users", (users) => {
         console.log("users", users);
-        for (let i = 0; i < users.length; i++) {
-          if (users[i].userId == this.#socket.userId) continue;
-          this.#addUserToList(users[i].userId, users[i].username);
+        for (const user of users) {
+          this.#addUserToList(user.userId, user.username);
         }
       });
     };
@@ -78,8 +90,10 @@ customElements.define(
     #userConnect = () => {
       this.#socket.on("user connected", (user) => {
         console.log("user connected", user);
-        if (user.userId != socket.userId) {
-          addUserToList(user.userId, user.username);
+        if (user.userId != this.#socket.userId) {
+          // addUserToList(user.userId, user.username);
+          console.log(user);
+          this.#addUserToList(user.userId, user.username);
         }
       });
     };
@@ -132,7 +146,7 @@ customElements.define(
               el,
               message.content,
               message.timestamp,
-              socket.username
+              this.#socket.username
             );
             messageContainer.appendChild(chatMessage);
           }
@@ -157,7 +171,7 @@ customElements.define(
         return;
       }
       console.log("sending message to", selectedUser);
-      socket.emit("private message", {
+      this.#socket.emit("private message", {
         content: chatInput.value,
         to: selectedUser.userId,
       });
@@ -167,7 +181,7 @@ customElements.define(
         element,
         chatInput.value,
         date,
-        socket.username
+        this.#socket.username
       );
       messageContainer.append(chatMessageSent);
       chatInput.value = "";
@@ -175,14 +189,21 @@ customElements.define(
     };
 
     #addUserToList = (userId, username) => {
-      const li = document.createElement("li");
-      li.setAttribute("userid", userId);
-      li.setAttribute("username", username);
-      li.addEventListener("click", selectUser);
-      const a = document.createElement("a");
-      a.innerText = username;
-      li.appendChild(a);
-      participantsContainer.appendChild(li);
+      console.log("add user to list");
+      const chatUser = this.#createUser(userId, username);
+      this.#userlist.appendChild(chatUser);
+    };
+
+    #createUser = (userId, username) => {
+      console.log("create", userId, username);
+      const newUser = document.createElement("chat-user");
+      newUser.setAttribute("userid", userId);
+      newUser.setAttribute("username", username);
+      newUser.setAttribute("slot", "user");
+      newUser.addEventListener("lc-user-selected", (event) => {
+        console.log(event.detail);
+      });
+      return newUser;
     };
   }
 );

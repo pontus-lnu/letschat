@@ -1,3 +1,5 @@
+import "./chat-user.js";
+
 const template = document.createElement("template");
 template.innerHTML = `
 <link href="/css/bulma.min.css" rel="stylesheet">
@@ -7,7 +9,10 @@ template.innerHTML = `
       <div class="menu px-5" style="width: 200px">
         <h1 class="title is-4">Let's chat</h1>
         <p class="menu-label">Online</p>
-        <ul class="menu-list" id="userscontainer"></ul>
+        <ul class="menu-list" id="userscontainer">
+          <slot name="user">
+          </slot>
+        </ul>
         <form action="/auth/logout" method="post" class="form m-5">
           <button class="button is-small is-link" type="submit">Logout</button>
         </form>
