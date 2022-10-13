@@ -1,5 +1,4 @@
 import { Pntscrypt } from "@pf222jd/pntscrypt";
-import { get } from "mongoose";
 import { pool } from "../lib/db.js";
 
 class User {
