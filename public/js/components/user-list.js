@@ -29,7 +29,14 @@ customElements.define(
       );
 
       // Selectors.
+      this.shadowRoot
+        .querySelector("#togglesidebar")
+        .addEventListener("click", this.#toggleSidebar);
       this.#usersContainer = this.shadowRoot.querySelector("#userscontainer");
     }
+
+    #toggleSidebar = () => {
+      this.shadowRoot.querySelector(".menu").toggleAttribute("hidden");
+    };
   }
 );
