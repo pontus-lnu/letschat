@@ -10,6 +10,10 @@ import morgan from "morgan";
 import { Server } from "socket.io";
 import http from "node:http";
 import MessageModel from "./model/Message.js";
+import SessionStore from "./server/SessionStore.js";
+import crypto from "crypto";
+
+const randomId = () => crypto.randomBytes(8).toString("hex");
 
 const messageModel = new MessageModel();
 const appDir = dirname(fileURLToPath(import.meta.url));
@@ -50,85 +54,85 @@ io.use(wrap(passport.session()));
 //   socket.username = username;
 //   next();
 // });
+const sessionStore = new SessionStore();
 io.use((socket, next) => {
-  if (socket.request.user) {
-    socket.username = socket.request.user.getUsername();
-    socket.userId = socket.request.user.getId();
-    next();
-  } else {
-    next(new Error("unauthorized"));
+  if (!socket.request.user) {
+    return next(new Error("Unauthorized"));
   }
+  const sessionId = socket.handshake.auth.sessionId;
+  if (sessionId && session.userId) {
+    const session = sessionStore.findSession(sessionId);
+    socket.sessionId = sessionId;
+    socket.userId = session.userId;
+    socket.username = socket.request.user.getUsername();
+    return next();
+  }
+  socket.username = socket.request.user.getUsername();
+  socket.userId = socket.request.user.getId();
+  socket.sessionId = randomId();
+  next();
 });
 
 io.on("connection", (socket) => {
+  socket.emit("session", {
+    sessionId: socket.sessionId,
+    userId: socket.userId,
+    username: socket.username,
+  });
+
   console.log(socket.username, "connected!");
   const numberOfUsers = io.of("/").sockets.size;
   console.log(numberOfUsers, " user(s) connected.");
 
+  console.log(socket.username, "joining socket", socket.userId.toString());
+  socket.join(socket.userId.toString());
+
   // Tell other users that we've connected
   socket.broadcast.emit("user connected", {
-    socketId: socket.id,
+    socketId: socket.socketId,
     userId: socket.userId,
     username: socket.username,
   });
+
   // Get list of all active users
   const users = [];
   for (let [id, socket] of io.of("/").sockets) {
     users.push({
-      socketId: socket.id,
+      socketId: socket.socketId,
       userId: socket.userId,
       username: socket.username,
     });
   }
   socket.emit("users", users);
 
-  socket.on("private message", async ({ content, socketId, userId }) => {
+  socket.on("private message", async ({ content, to }) => {
+    console.log("private messages on server", to, content);
     const newMessage = await messageModel.createMessage(
       socket.userId,
-      userId,
+      to,
       content
     );
-    socket.to(socketId).emit("private message", {
-      content: content,
-      socketId: socket.id,
-      from: { id: socket.userId, username: socket.username },
-      timestamp: newMessage.getTimestamp(),
-    });
-    // const message = {
-    //   content,
-    //   from: socket.userId,
-    //   to,
-    // };
-    // socket.to(to).to(socket.userId).emit("private message", message);
+    socket
+      .to(to)
+      .to(socket.userId)
+      .emit("private message", {
+        content: content,
+        from: { id: socket.userId, username: socket.username },
+        timestamp: newMessage.getTimestamp(),
+      });
   });
-  // socket.on("chat message", async (message) => {
-  //   try {
-  //     const senderId = socket.request.session.passport.user.id;
-  //     const receiverId = message.receiverId;
-  //     const newMessage = await messageModel.createMessage(
-  //       senderId,
-  //       receiverId,
-  //       message.content
-  //     );
-  //     io.emit("chat message", {
-  //       content: message.content,
-  //       sender: socket.request.session.passport.user.username,
-  //       timestamp: newMessage.getTimestamp(),
-  //     });
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // });
+
   socket.on("disconnect", () => {
     console.log(socket.username, "disconnected");
     const numberOfUsers = io.of("/").sockets.size;
     console.log(numberOfUsers, " user(s) connected.");
     io.emit("user disconnected", {
-      userId: socket.id,
+      userId: socket.socketId,
       username: socket.username,
     });
   });
 });
+
 httpServer.listen(3000, () => {
   console.log("Listening on *:3000");
 });
