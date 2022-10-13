@@ -1,20 +1,15 @@
 <!DOCTYPE html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/css/bulma.min.css">
-  <link rel="stylesheet" href="/vendor/fontawesome/css/all.css">
-</head>
-<body>
-   <section class="hero is-fullheight"> 
-<div class="columns">
-  <%- include('../chat/participants') %>  
-<main class="column is-10 has-background-light">
-  <%- body %>
-</main>
-</div>
-  </section>
-<script src="/socket.io/socket.io.js"></script>
-<script src="/js/socket.js"></script>
-</body>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+    />
+    <link rel="stylesheet" href="/vendor/fontawesome/css/all.css" />
+  </head>
+  <body>
+    <%- body %>
+  </body>
 </html>
