@@ -33,11 +33,11 @@ export class Message {
 
 export default class MessageModel {
   async getMessages(participant1, participant2) {
-    const lastTenMessages = {
-      text: "SELECT * FROM messages WHERE sender in ($1,$2) AND receiver in ($1,$2) LIMIT 10",
+    const messagesInDb = {
+      text: "SELECT * FROM messages WHERE sender in ($1,$2) AND receiver in ($1,$2)",
       values: [participant1, participant2],
     };
-    const messagesResponse = await pool.query(lastTenMessages);
+    const messagesResponse = await pool.query(messagesInDb);
     const messages = [];
     messagesResponse.rows.forEach((row) => {
       messages.push(this.#createMessageFromRow(row));
