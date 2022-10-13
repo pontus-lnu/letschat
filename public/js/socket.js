@@ -64,6 +64,7 @@ socket.on("session", ({ sessionId, userId, username }) => {
 socket.on("users", async (users) => {
   console.log("users", users);
   for (let i = 0; i < users.length; i++) {
+    if (users[i].userId == socket.userId) continue;
     addUserToList(users[i].userId, users[i].username);
   }
 });
@@ -81,14 +82,9 @@ const addUserToList = (userId, username) => {
 
 socket.on("user connected", (user) => {
   console.log("user connected", user);
-  const li = document.createElement("li");
-  li.setAttribute("userid", user.userId);
-  li.setAttribute("username", user.username);
-  li.addEventListener("click", selectUser);
-  const a = document.createElement("a");
-  a.innerText = user.username;
-  li.appendChild(a);
-  participantsContainer.appendChild(li);
+  if (user.userId != socket.userId) {
+    addUserToList(user.userId, user.username);
+  }
 });
 
 socket.on("user disconnected", (userId) => {
@@ -102,6 +98,10 @@ socket.on("user disconnected", (userId) => {
 });
 
 const selectUser = (event) => {
+  if (selectedUser.userId == event.target.parentNode.getAttribute("userid")) {
+    return;
+  }
+  messageContainer.innerHTML = "";
   selectedUser.userId = event.target.parentNode.getAttribute("userid");
   selectedUser.username = event.target.parentNode.getAttribute("username");
   console.log("selected user", selectedUser.userId);
