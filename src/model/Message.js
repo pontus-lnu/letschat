@@ -1,5 +1,6 @@
 import { pool } from "../lib/db.js";
 import { fromUnixTime, getUnixTime } from "date-fns";
+import { Pntscrypt } from "@pf222jd/pntscrypt";
 
 export class Message {
   #sender;
@@ -47,9 +48,11 @@ export default class MessageModel {
 
   async createMessage(sender, receiver, message) {
     const timestamp = getUnixTime(Date.now());
+    const encryption = new Pntscrypt(message);
+    const encryptedMessage = encryption.encryptUsingSubstitution(10);
     const createMessageResponse = await pool.query({
       text: "INSERT INTO messages(sender,receiver,content,timestamp) VALUES ($1,$2,$3,$4) RETURNING *",
-      values: [sender, receiver, message, timestamp],
+      values: [sender, receiver, encryptedMessage, timestamp],
     });
     if (createMessageResponse.rows.length === 1) {
       return this.#createMessageFromRow(createMessageResponse.rows[0]);
@@ -59,6 +62,12 @@ export default class MessageModel {
   }
 
   #createMessageFromRow(row) {
-    return new Message(row.sender, row.receiver, row.content, row.timestamp);
+    const pntscrypt = new Pntscrypt(row.content);
+    return new Message(
+      row.sender,
+      row.receiver,
+      pntscrypt.decryptUsingSubstitution(10),
+      row.timestamp
+    );
   }
 }
