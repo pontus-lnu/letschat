@@ -106,20 +106,23 @@ io.on("connection", async (socket) => {
 
   // Get list of all active users
   const users = [];
-  for (let [id, socket] of io.of("/").sockets) {
+  for (let [id, s] of io.of("/").sockets) {
     let userExists = false;
     users.forEach((user) => {
-      if (user.userId == socket.userId) {
+      if (user.userId == s.userId) {
         userExists = true;
       }
     });
     if (userExists) {
       continue;
     }
+    if (s.userId == socket.userId) {
+      continue;
+    }
     users.push({
-      socketId: socket.socketId,
-      userId: socket.userId,
-      username: socket.username,
+      socketId: s.socketId,
+      userId: s.userId,
+      username: s.username,
     });
   }
   socket.emit("users", users);
@@ -135,17 +138,15 @@ io.on("connection", async (socket) => {
       .to(to)
       .to(socket.userId.toString())
       .emit("private message", {
-        content: content,
+        content: newMessage.getContent(),
         from: { id: socket.userId, username: socket.username },
         timestamp: newMessage.getTimestamp(),
       });
   });
 
   socket.on("disconnect", async () => {
-    // console.log(socket.username, "disconnected");
-    // const numberOfUsers = io.of("/").sockets.size;
     console.log(numberOfUsers, " user(s) connected.");
-    const matchingSockets = await io.in(socket.userId).allSockets();
+    const matchingSockets = await io.in(socket.userId.toString()).allSockets();
     console.log("matching sockets", matchingSockets);
     const isDisconnected = matchingSockets.size === 0;
     if (isDisconnected) {
