@@ -28,9 +28,10 @@ class User {
 
 export default class UserModel {
   async getUser(username) {
+    const pntscrypt = new Pntscrypt(username);
     const getUserResponse = await pool.query({
       text: "SELECT * FROM users WHERE username = $1",
-      values: [username],
+      values: [pntscrypt.encryptUsingSubstitution(10)],
     });
     if (getUserResponse.rowCount !== 1) {
       throw Error("No user with username: " + username);
@@ -54,9 +55,10 @@ export default class UserModel {
   async createUser(username, password) {
     const pntscrypt = new Pntscrypt(password);
     const hashedPassword = pntscrypt.encryptUsingHash();
+    const usernameEncryption = new Pntscrypt(username);
     const createUserResponse = await pool.query({
       text: "INSERT INTO users(username, password) VALUES($1, $2)",
-      values: [username, hashedPassword],
+      values: [usernameEncryption.encryptUsingSubstitution(10), hashedPassword],
     });
     if (createUserResponse.rowCount === 1) {
       return new User(username, hashedPassword);
@@ -66,6 +68,11 @@ export default class UserModel {
   }
 
   #createUserFromRow(row) {
-    return new User(row.username, row.password, row.id);
+    const pntscrypt = new Pntscrypt(row.username);
+    return new User(
+      pntscrypt.decryptUsingSubstitution(10),
+      row.password,
+      row.id
+    );
   }
 }
