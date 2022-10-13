@@ -93,7 +93,7 @@ io.on("connection", async (socket) => {
   );
   socket.join(socket.userId.toString());
 
-  const matchingSockets = await io.in(socket.userId).allSockets();
+  const matchingSockets = await io.in(socket.userId.toString()).allSockets();
   console.log(matchingSockets);
   if (matchingSockets.size < 2) {
     // Tell other users that we've connected
@@ -133,7 +133,7 @@ io.on("connection", async (socket) => {
     );
     socket
       .to(to)
-      .to(socket.userId)
+      .to(socket.userId.toString())
       .emit("private message", {
         content: content,
         from: { id: socket.userId, username: socket.username },

@@ -113,17 +113,15 @@ const selectUser = (event) => {
 
 socket.on("private message", ({ content, from, timestamp }) => {
   console.log("received message", content, "from", from.username);
-  const message = document.createElement("chat-message-received");
-  message.setAttribute("sender", from.username);
-  const messageContent = document.createElement("span");
-  messageContent.setAttribute("slot", "content");
-  messageContent.innerText = content;
-  message.appendChild(messageContent);
-  const time = document.createElement("span");
-  time.setAttribute("slot", "timestamp");
-  time.innerText = timestamp;
-  message.appendChild(time);
-  messageContainer.append(message);
+  if (from.id == socket.userId) {
+    const el = document.createElement("chat-message-sent");
+    const message = createChatMessage(el, content, timestamp, from.username);
+    messageContainer.append(message);
+  } else {
+    const el = document.createElement("chat-message-received");
+    const message = createChatMessage(el, content, timestamp, from.username);
+    messageContainer.append(message);
+  }
   scrolldown();
 });
 
