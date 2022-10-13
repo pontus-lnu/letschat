@@ -38,5 +38,21 @@ customElements.define(
     #toggleSidebar = () => {
       this.shadowRoot.querySelector(".menu").toggleAttribute("hidden");
     };
+
+    #selectUser = (event) => {
+      if (
+        selectedUser.userId == event.target.parentNode.getAttribute("userid")
+      ) {
+        return;
+      }
+      messageContainer.innerHTML = "";
+      selectedUser.userId = event.target.parentNode.getAttribute("userid");
+      selectedUser.username = event.target.parentNode.getAttribute("username");
+      console.log("selected user", selectedUser.userId);
+      socket.emit("get messages", {
+        user1: socket.userId,
+        user2: selectedUser.userId,
+      });
+    };
   }
 );

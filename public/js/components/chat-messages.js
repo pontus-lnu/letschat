@@ -18,5 +18,22 @@ customElements.define(
         template.content.cloneNode(true)
       );
     }
+
+    #scrollDown = () => {
+      messageContainer.scrollTop = messageContainer.scrollHeight;
+    };
+
+    #createChatMessage = (element, content, time, from) => {
+      element.setAttribute("sender", from);
+      const elementContent = document.createElement("span");
+      elementContent.setAttribute("slot", "content");
+      elementContent.innerText = content;
+      element.appendChild(elementContent);
+      const timestamp = document.createElement("span");
+      timestamp.setAttribute("slot", "timestamp");
+      timestamp.innerText = time;
+      element.appendChild(timestamp);
+      return element;
+    };
   }
 );
