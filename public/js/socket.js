@@ -10,7 +10,11 @@ const participantsContainer = document.querySelector("#socketparticipants");
 const messageContainer = document.querySelector("#socketmessages");
 const chatForm = document.querySelector("#chatform");
 const chatInput = document.querySelector("#chatinput");
-let selectedUser = "";
+let selectedUser = {};
+
+const scrolldown = () => {
+  messageContainer.scrollTop = messageContainer.scrollHeight;
+};
 
 const createChatMessage = (element, content, time, from) => {
   element.setAttribute("sender", from);
@@ -33,7 +37,7 @@ const sendMessage = (event) => {
   console.log("sending message to", selectedUser);
   socket.emit("private message", {
     content: chatInput.value,
-    to: selectedUser,
+    to: selectedUser.userId,
   });
   const element = document.createElement("chat-message-sent");
   const date = new Date().toString();
@@ -45,6 +49,7 @@ const sendMessage = (event) => {
   );
   messageContainer.append(chatMessageSent);
   chatInput.value = "";
+  scrolldown();
 };
 chatForm.addEventListener("submit", sendMessage);
 
@@ -66,6 +71,7 @@ socket.on("users", async (users) => {
 const addUserToList = (userId, username) => {
   const li = document.createElement("li");
   li.setAttribute("userid", userId);
+  li.setAttribute("username", username);
   li.addEventListener("click", selectUser);
   const a = document.createElement("a");
   a.innerText = username;
@@ -77,6 +83,7 @@ socket.on("user connected", (user) => {
   console.log("user connected", user);
   const li = document.createElement("li");
   li.setAttribute("userid", user.userId);
+  li.setAttribute("username", user.username);
   li.addEventListener("click", selectUser);
   const a = document.createElement("a");
   a.innerText = user.username;
@@ -95,8 +102,13 @@ socket.on("user disconnected", (userId) => {
 });
 
 const selectUser = (event) => {
-  selectedUser = event.target.parentNode.getAttribute("userid");
-  console.log("selected user", selectedUser);
+  selectedUser.userId = event.target.parentNode.getAttribute("userid");
+  selectedUser.username = event.target.parentNode.getAttribute("username");
+  console.log("selected user", selectedUser.userId);
+  socket.emit("get messages", {
+    user1: socket.userId,
+    user2: selectedUser.userId,
+  });
 };
 
 socket.on("private message", ({ content, from, timestamp }) => {
@@ -112,8 +124,36 @@ socket.on("private message", ({ content, from, timestamp }) => {
   time.innerText = timestamp;
   message.appendChild(time);
   messageContainer.append(message);
+  scrolldown();
 });
 
 socket.on("private message", (message) => {
   console.log(message);
+});
+
+socket.on("messages", (messages) => {
+  console.log(messages);
+  messages.forEach((message) => {
+    if (message.from == socket.userId) {
+      const el = document.createElement("chat-message-sent");
+      const chatMessage = createChatMessage(
+        el,
+        message.content,
+        message.timestamp,
+        socket.username
+      );
+      messageContainer.appendChild(chatMessage);
+    }
+    if (message.from != socket.userId) {
+      const el = document.createElement("chat-message-received");
+      const chatMessage = createChatMessage(
+        el,
+        message.content,
+        message.timestamp,
+        selectedUser.username
+      );
+      messageContainer.appendChild(chatMessage);
+    }
+  });
+  scrolldown();
 });

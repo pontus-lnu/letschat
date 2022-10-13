@@ -91,7 +91,7 @@ io.on("connection", async (socket) => {
     "session",
     socket.sessionId
   );
-  socket.join(socket.userId);
+  socket.join(socket.userId.toString());
 
   const matchingSockets = await io.in(socket.userId).allSockets();
   console.log(matchingSockets);
@@ -151,6 +151,22 @@ io.on("connection", async (socket) => {
     if (isDisconnected) {
       socket.broadcast.emit("user disconnected", socket.userId);
     }
+  });
+
+  socket.on("get messages", async ({ user1, user2 }) => {
+    console.log("getting messages");
+    const getMessagesResponse = await messageModel.getMessages(user1, user2);
+    const messagesToEmit = [];
+    getMessagesResponse.forEach((message) => {
+      messagesToEmit.push({
+        from: message.getSender(),
+        to: message.getReceiver(),
+        content: message.getContent(),
+        timestamp: message.getTimestamp(),
+      });
+    });
+    console.log(messagesToEmit);
+    socket.emit("messages", messagesToEmit);
   });
 });
 
