@@ -43,6 +43,9 @@ customElements.define(
     #addEventListeners = () => {
       this.toggleButton.addEventListener("click", this.#toggleUserlist);
       this.addEventListener("lc-add-user", (event) => this.#addUser(event));
+      this.addEventListener("lc-remove-user", (event) => {
+        this.#removeUser(event);
+      });
     };
 
     #toggleUserlist = () => {
@@ -59,6 +62,17 @@ customElements.define(
         this.dispatchEvent(new CustomEvent("lc-user-selected", event))
       );
       this.#userList.appendChild(newUser);
+    };
+
+    #removeUser = (event) => {
+      console.log(event);
+      const { userId } = event.detail;
+      const currentUsers = this.#userList.querySelectorAll("chat-user");
+      currentUsers.forEach((user) => {
+        if (user.getAttribute("userid") == userId) {
+          user.remove();
+        }
+      });
     };
 
     // #selectUser = (event) => {

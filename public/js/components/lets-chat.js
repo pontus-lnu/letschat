@@ -113,12 +113,9 @@ customElements.define(
     #onUserDisconnect = () => {
       this.#socket.on("user disconnected", (userId) => {
         console.log("user disconnected", userId);
-        const users = participantsContainer.querySelectorAll("li");
-        users.forEach((userInList) => {
-          if (userInList.getAttribute("userid") == userId) {
-            userInList.remove();
-          }
-        });
+        this.#userList.dispatchEvent(
+          new CustomEvent("lc-remove-user", { detail: { userId: userId } })
+        );
       });
     };
 
