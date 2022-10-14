@@ -5,13 +5,11 @@ template.innerHTML = `
 <link href="/css/bulma.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/vendor/fontawesome/css/all.css">
     <aside class="column is-narrow is-fullheight" id="aside">
-      <i class="fas fa-bars m-5" style="cursor: pointer" id="togglesidebar"></i>
+      <i class="fas fa-bars m-5" style="cursor: pointer" id="togglebutton"></i>
       <div class="menu px-5" style="width: 200px">
         <h1 class="title is-4">Let's chat</h1>
         <p class="menu-label">Online</p>
-        <ul class="menu-list" id="userscontainer">
-          <slot name="user">
-          </slot>
+        <ul class="menu-list" id="user-list">
         </ul>
         <form action="/auth/logout" method="post" class="form m-5">
           <button class="button is-small is-link" type="submit">Logout</button>
@@ -23,8 +21,8 @@ template.innerHTML = `
 customElements.define(
   "user-list",
   class extends HTMLElement {
-    #users = [];
-    #usersContainer;
+    toggleButton;
+    #userList;
 
     constructor() {
       super();
@@ -33,31 +31,44 @@ customElements.define(
         template.content.cloneNode(true)
       );
 
-      // Selectors.
-      this.shadowRoot
-        .querySelector("#togglesidebar")
-        .addEventListener("click", this.#toggleSidebar);
-      this.#usersContainer = this.shadowRoot.querySelector("#userscontainer");
+      this.#addSelectors();
+      this.#addEventListeners();
     }
 
-    #toggleSidebar = () => {
+    #addSelectors = () => {
+      this.toggleButton = this.shadowRoot.querySelector("#togglebutton");
+      this.#userList = this.shadowRoot.querySelector("#user-list");
+    };
+
+    #addEventListeners = () => {
+      this.toggleButton.addEventListener("click", this.#toggleUserlist);
+      this.addEventListener("lc-add-user", (event) => this.#addUser(event));
+    };
+
+    #toggleUserlist = () => {
       this.shadowRoot.querySelector(".menu").toggleAttribute("hidden");
     };
 
-    #selectUser = (event) => {
-      if (
-        selectedUser.userId == event.target.parentNode.getAttribute("userid")
-      ) {
-        return;
-      }
-      messageContainer.innerHTML = "";
-      selectedUser.userId = event.target.parentNode.getAttribute("userid");
-      selectedUser.username = event.target.parentNode.getAttribute("username");
-      console.log("selected user", selectedUser.userId);
-      socket.emit("get messages", {
-        user1: socket.userId,
-        user2: selectedUser.userId,
-      });
+    #addUser = (event) => {
+      const { userId, username } = event.detail;
+      console.log("create", userId, username);
+      const newUser = document.createElement("chat-user");
+      newUser.setAttribute("userid", userId);
+      newUser.setAttribute("username", username);
+      newUser.addEventListener("lc-user-selected", (event) =>
+        this.dispatchEvent(new CustomEvent("lc-user-selected", event))
+      );
+      this.#userList.appendChild(newUser);
     };
+
+    // #selectUser = (event) => {
+    //   console.log(event);
+    //   const { userId, username } = event.detail;
+    //   this.dispatchEvent(
+    //     new CustomEvent("lc-user-selected", {
+    //       detail: { userId: userId, username: username },
+    //     })
+    //   );
+    // };
   }
 );

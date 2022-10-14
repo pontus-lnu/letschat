@@ -22,11 +22,15 @@ customElements.define(
         template.content.cloneNode(true)
       );
 
+      this.#addSelectors();
       this.#addEventListeners();
     }
 
-    #addEventListeners = () => {
+    #addSelectors = () => {
       this.#a = this.shadowRoot.querySelector("a");
+    };
+
+    #addEventListeners = () => {
       this.#a.addEventListener("click", this.#selectUser);
     };
 
@@ -36,21 +40,18 @@ customElements.define(
 
     attributeChangedCallback(name, oldValue, newValue) {
       if (name == "userid") {
-        console.log("setting user id");
         this.#userid = newValue;
       }
       if (name == "username") {
-        console.log("setting username");
         this.#a.innerText = newValue;
         this.#username = newValue;
       }
     }
 
     #selectUser = () => {
-      console.log("dispatching event");
       this.dispatchEvent(
         new CustomEvent("lc-user-selected", {
-          detail: { userId: this.#userid, username: this.#username },
+          detail: { peerUserId: this.#userid, peerUsername: this.#username },
           bubbles: true,
         })
       );
