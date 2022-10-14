@@ -3,10 +3,10 @@ template.innerHTML = `
 <link href="/css/bulma.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/vendor/fontawesome/css/all.css">
 <div class="column is-full">
-  <form id="chatform">
+  <form id="chat-form">
     <div class="field is-grouped">
       <p class="control is-expanded">
-        <input class="input" type="text" id="chatinput" />
+        <input class="input" type="text" id="chat-input" />
       </p>
       <p class="control">
         <button class="button is-info" type="submit">
@@ -15,14 +15,14 @@ template.innerHTML = `
       </p>
     </div>
   </form>
-</div>;
+</div>
 `;
 
 customElements.define(
   "chat-input",
   class extends HTMLElement {
-    #form;
-    #input;
+    #chatForm;
+    #chatInput;
 
     constructor() {
       super();
@@ -31,24 +31,33 @@ customElements.define(
         template.content.cloneNode(true)
       );
 
-      this.#form = this.shadowRoot.querySelector("#chatform");
-      this.#form.addEventListener("submit", this.#sendMessage);
-      this.#input = this.shadowRoot.querySelector("#chatinput");
+      this.#addSelectors();
+      this.#addEventListeners();
     }
 
+    #addSelectors = () => {
+      this.#chatForm = this.shadowRoot.querySelector("#chat-form");
+      this.#chatInput = this.shadowRoot.querySelector("#chat-input");
+    };
+
+    #addEventListeners = () => {
+      this.#chatForm.addEventListener("submit", this.#sendMessage);
+    };
+
     #sendMessage = (event) => {
-      console.log(this.#input.value);
       event.preventDefault();
-      if (this.#input.value == "") {
-        return;
-      } else {
+      if (!this.#isEmpty()) {
         this.dispatchEvent(
           new CustomEvent("lc-input-submitted", {
-            detail: { message: this.#input.value },
+            detail: { message: this.#chatInput.value },
           })
         );
-        this.#input.value = "";
+        this.#chatInput.value = "";
       }
     };
+
+    #isEmpty() {
+      return this.#chatInput.value == "";
+    }
   }
 );

@@ -130,7 +130,7 @@ export default class SocketManager {
           .to(socket.userId.toString())
           .emit("private message", {
             content: newMessage.getContent(),
-            from: { id: socket.userId, username: socket.username },
+            from: { userId: socket.userId, username: socket.username },
             timestamp: newMessage.getTimestamp(),
           });
       });

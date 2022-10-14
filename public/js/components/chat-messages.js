@@ -41,7 +41,6 @@ customElements.define(
     };
 
     #addSentMessage = (event) => {
-      console.log(event);
       const sentMessageElement = document.createElement("chat-message-sent");
       const newMessage = this.#createChatMessage(sentMessageElement, event);
       this.#chatmessages.appendChild(newMessage);
@@ -49,7 +48,6 @@ customElements.define(
     };
 
     #addReceivedMessage = (event) => {
-      console.log(event);
       const receivedMessageElement = document.createElement(
         "chat-message-received"
       );

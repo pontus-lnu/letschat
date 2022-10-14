@@ -26,7 +26,7 @@ customElements.define(
     #chatInput;
     #userList;
     #chatMessages;
-    #selectedUser;
+    #selectedUser = {};
 
     constructor() {
       super();
@@ -49,7 +49,7 @@ customElements.define(
 
     #addEventListeners = () => {
       this.#chatInput.addEventListener("lc-input-submitted", (event) => {
-        console.log(event.detail);
+        this.#sendMessage(event.detail.message);
       });
       this.#userList.addEventListener("lc-user-selected", (event) => {
         this.#userSelected(event);
@@ -123,48 +123,26 @@ customElements.define(
     };
 
     #onPrivateMessage = () => {
-      this.#socket.on("private message", ({ content, from, timestamp }) => {
-        console.log("received message", content, "from", from.username);
-        if (from.id == this.#socket.userId) {
-          const el = document.createElement("chat-message-sent");
-          const message = createChatMessage(
-            el,
-            content,
-            timestamp,
-            from.username
-          );
-          messageContainer.append(message);
-        } else {
-          const el = document.createElement("chat-message-received");
-          const message = createChatMessage(
-            el,
-            content,
-            timestamp,
-            from.username
-          );
-          messageContainer.append(message);
+      this.#socket.on("private message", (messageToAdd) => {
+        if (this.#notFromSelectedUser(messageToAdd.from.userId)) {
+          return;
         }
-        scrolldown();
+        this.#addReceivedMessage({
+          ...messageToAdd,
+          from: this.#selectedUser.username,
+        });
       });
     };
 
     #onMessages = () => {
       this.#socket.on("messages", (messages) => {
-        messages.forEach((message) => {
-          if (this.#isFromMyself(message.from)) {
-            message.from = this.#socket.username;
-            this.#chatMessages.dispatchEvent(
-              new CustomEvent("lc-add-sent-message", {
-                detail: message,
-              })
-            );
+        messages.forEach((messageToAdd) => {
+          if (this.#isFromMyself(messageToAdd.from)) {
+            messageToAdd.from = this.#socket.username;
+            this.#addSentMessage(messageToAdd);
           } else {
-            message.from = this.#selectedUser.username;
-            this.#chatMessages.dispatchEvent(
-              new CustomEvent("lc-add-received-message", {
-                detail: message,
-              })
-            );
+            messageToAdd.from = this.#selectedUser.username;
+            this.#addReceivedMessage(messageToAdd);
           }
         });
       });
@@ -179,27 +157,38 @@ customElements.define(
       this.#getMessages(this.#selectedUser.userId);
     };
 
-    #sendMessage = (event) => {
-      event.preventDefault();
-      if (selectedUser == "") {
+    #sendMessage = (textToSend) => {
+      if (this.#selectedUser == {}) {
         return;
       }
-      console.log("sending message to", selectedUser);
+      console.log("sending message to", this.#selectedUser);
       this.#socket.emit("private message", {
-        content: chatInput.value,
-        to: selectedUser.userId,
+        content: textToSend,
+        to: this.#selectedUser.userId,
       });
-      const element = document.createElement("chat-message-sent");
-      const date = new Date().toString();
-      const chatMessageSent = createChatMessage(
-        element,
-        chatInput.value,
-        date,
-        this.#socket.username
+      const dateForMessage = new Date().toString();
+      const messageToAddLocally = {
+        from: this.#socket.username,
+        content: textToSend,
+        timestamp: dateForMessage,
+      };
+      this.#addSentMessage(messageToAddLocally);
+    };
+
+    #addSentMessage = (message) => {
+      this.#chatMessages.dispatchEvent(
+        new CustomEvent("lc-add-sent-message", {
+          detail: message,
+        })
       );
-      messageContainer.append(chatMessageSent);
-      chatInput.value = "";
-      scrolldown();
+    };
+
+    #addReceivedMessage = (message) => {
+      this.#chatMessages.dispatchEvent(
+        new CustomEvent("lc-add-received-message", {
+          detail: message,
+        })
+      );
     };
 
     #getMessages = (peerUserId) => {
@@ -215,6 +204,10 @@ customElements.define(
 
     #isFromMyself = (userId) => {
       return this.#isMyself(userId);
+    };
+
+    #notFromSelectedUser = (userIdToCompare) => {
+      return this.#selectedUser.userId != userIdToCompare;
     };
   }
 );
