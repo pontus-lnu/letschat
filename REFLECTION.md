@@ -136,9 +136,11 @@ Men jag förstår `socket.io` för dåligt och om jag börjar bryta ut så sluta
 
 ## Kodformat
 
-Jag lägger alltid mina instansvariabler längst upp efter klassdeklarationen. Det ska vara förutsägbart var man hittar dessa. [^13]
+Jag försöker placera kod längs vertika axel på ett förutsägbart sätt. Jag försöker tänka på det vertikala avståndet mellan olika typer av kod, för att skapa god kodkvalitet. [^13]
 
-I koden för [lets-chat.js](/public/js/components/lets-chat.js) har jag försökt tänka på det vertikala avståndet mellan kod. [^14]
+Längst upp, efter klassdeklarationen, lägger jag instansvariabler. Precis som konventionen är inom Java. [^14]
+
+Sen kommer konstruktorn. Fyra stora kategorier på hög abstraktionsnivå. Man kan tänka sig att vi vill lägga till fler selektorer eller eventhanterare längre fram. Då vet vi var vi ska lägga dem.
 
 ```
 this.#addSelectors();
@@ -147,12 +149,11 @@ this.#connectWebsocketClient();
 this.#addEventHandlers();
 ```
 
-Denna kod är i konstruktorn.
-Efter konstruktorn kommer dessa funktioner på av hög abstraktionsnivå efter varandra.
+Efter konstruktorn definieras funktionerna i samma ordning som de anropas.
 
-Jag tycker själv inte att vertikal närhet är det viktigaste när det kommer till kodkvalitet. Då vill jag hellre ha att all kod är formatterad på samma sätt och har rätt indentering.
+I regel väljer jag sen att lägga funktioner som blir anropade ovanför de som anropar, så som det beskrivs i kurslitteraturen. Jag tänker oftast så. Det är mer sällan jag väljer att placera funktioner vertikalt med grund i att de är viktiga för förståelsen av föregående kod.
 
-Jag tycker dock om att ha en struktur för hur jag använder kodens vertikala utrymme. Längst upp brukar jag ha publika funktioner. Sen använder jag principen för om funktioner är anropas/används eller är viktiga för förståelse för att välja placering. Längst ner har jag korta, ofta självförklarande boolean checks:
+Längst ner har i mina klasser har jag korta, ofta självförklarande boolean checks:
 
 ```
 #isMyself = (userId) => {
@@ -176,7 +177,7 @@ Den ligge runt 200 rader vilket är på smärtgränsen. Jag vill gärna behöva 
 [^10]: Clean code, s. 63.
 [^11]: Clean code, s. 67.
 [^12]: Clean code, s. 69.
-[^13]: Clean code, s. 81.
+[^13]: Clean code, s. 80-81.
 [^14]:
-    Clean code, s. 80-81.  
+    Clean code, s. 81.
     [^15]: Clean code, s. 77.
