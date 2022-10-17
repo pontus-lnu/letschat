@@ -48,11 +48,13 @@ Jag skapade en [SocketManager](/src/server/SocketManager.js)-klass och fick en r
 
 Jag vet vad jag vill göra med [SocketManager](/src/server/SocketManager.js). Jag kan inte ha all logik i en stor `handleConnection`-funktion. Jag vill dela upp i abstraktionsnivåer och skapa mindre funktioner så de gör färre saker. `handleConnection` **är oacceptabel**.
 
+![Bad function](/img/bad_function.png "bad function")
+
 Jag har problem dock. Jag förstår [socket.io](https://github.com/socketio/socket.io) för dåligt för att kunna ändra koden. Här har jag tagit mig vatten över huvudet. Om jag skippat websockets så hade jag inte stött på det här hindret.
 
 ## Slutsats websockets
 
-Jag tror jag byggde för stor fungerande, dålig kod innan jag började refaktorera. Det känns för stort och tråkigt. Här är en stor lärdom. Visst, bygg fult först så det fungerar, men bygg inte för mycket fulheter. Små chunks och sen refaktorering.
+Jag tror jag byggde för stor fungerande, dålig kod innan jag började refaktorera. Det känns för stort och tråkigt att ta tag i vid det här laget. Här är en stor lärdom. Visst, bygg fult först så det fungerar, men bygg inte för mycket fulheter. Små chunks och sen refaktorering.
 
 Det är dock bra att jag fick undan websocketlogiken från [server.js](/src/server.js) och kappslar in en stor del av koden i privata funktioner. [^3] Nu förstör man inte websocketfunktionalitet om man ändrar i [server.js](/src/server.js). Jag säger också tydligt att vi har en [SocketManager](/src/server/SocketManager.js). Andra utvecklare kan ta del och arbeta med den delen av koden i den klassen.
 
@@ -63,6 +65,8 @@ I fortsatt arbete med [SocketManager](/src/server/SocketManager.js) hade jag gar
 Jag gör mig garanterat skyldig till upprepning i koden. Det tog för mycket tid att sätta mig in i de bibliotek jag behöver använda för att uppfylla kraven. Jag är dock medveten om regeln G5 Duplication. [^5]
 
 Ett exempel på hur jag vill skriva kod för att undvika kodduplicering är funktionen `createMessageFromRow` i [Message](/src/model/Message.js).
+
+!["DRY exempel"](./img/dry_function.png "DRY example")
 
 Funktionen har ett tydligt, beskrivande namn. Den gör en sak. Den möjliggör att vi kan undvika kodduplicering, eftersom vi behöver konvertera en databasrad till ett meddelande på många platser i modellen.
 
@@ -98,6 +102,8 @@ I min egen kod har jag också sett hur kommentarer åldras dåligt. När komment
 
 Jag har en tendens att ibland kommentera ut kod. Jag kanske utvärderar ett alternativt sätt att lösa ett problem. Men jag vill ha kvar originallösningen. Detta försöker jag undvika och har tagit bort all utkommenterad kod i Letschat. Vi har versionshanteringssystem, jag borde sluta ängslas och ta bort kod istället för att kommentera ut. [^12]
 
+Ryggmärksreaktionen för mig efter kapitel 5 var att sluta helt med kommentarer. Lite ögonöppnande och förlösande ska jag erkänna. Jag tror att jag rätt snart kommer börja skriva lite kommentarer igen. Jag tycker dock det är lite knivigt. Det är mycket enklare att ta till sig av namngivning och funktioner från kurslitteraturen och sen tillämpa det.
+
 ## Vad jag skäms mest över
 
 Denna kod i [SocketManager](/src/server/SocketManager.js) är det som jag skäms mest över i hela applikationen:
@@ -128,7 +134,7 @@ För det första. Jag använder namnet `s` bara för att socket är upptaget.
 
 För det andra `if (s.userId == socket.userId)` kunde varit en funktion i stil med isMyself, så som jag gjort på klientsidan.
 
-För det tredje. Denna for-loop kunde lyfts ut till en funktion med ett meningsfullt namn, kanske `getUniquePeerUsersInSockets`?
+För det tredje. Denna for-loop kunde lyfts ut till en funktion med ett meningsfullt namn, kanske `getUniquePeerUsersInSockets`? Eller bara `getPeerUsers`? Måste vi veta att de är unika när vi läser funktionsnamnet? Antagligen inte.
 
 För det fjärde, jag har nestade for-loopar. Den inre for-loopen borde kunna lyftas ut till en enkel `userExists`-funktion
 
@@ -151,7 +157,7 @@ this.#addEventHandlers();
 
 Efter konstruktorn definieras funktionerna i samma ordning som de anropas.
 
-I regel väljer jag sen att lägga funktioner som blir anropade ovanför de som anropar, så som det beskrivs i kurslitteraturen. Jag tänker oftast så. Det är mer sällan jag väljer att placera funktioner vertikalt med grund i att de är viktiga för förståelsen av föregående kod.
+I regel väljer jag sen att lägga funktioner som blir anropade precis under de som anropar, så som det beskrivs i kurslitteraturen. Jag tänker oftast så. Det är mer sällan jag väljer att placera funktioner vertikalt med grund i att de är viktiga för förståelsen av föregående kod.
 
 Längst ner har i mina klasser har jag korta, ofta självförklarande boolean checks:
 
