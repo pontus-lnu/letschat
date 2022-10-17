@@ -74,15 +74,5 @@ customElements.define(
         }
       });
     };
-
-    // #selectUser = (event) => {
-    //   console.log(event);
-    //   const { userId, username } = event.detail;
-    //   this.dispatchEvent(
-    //     new CustomEvent("lc-user-selected", {
-    //       detail: { userId: userId, username: username },
-    //     })
-    //   );
-    // };
   }
 );

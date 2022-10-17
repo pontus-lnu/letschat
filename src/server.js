@@ -23,7 +23,7 @@ app.set("layout", join(appDir, "views", "layouts", "default"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(morgan("dev"));
-app.set("trust proxy", 1); // trust first proxy
+app.set("trust proxy", 1);
 const sessionMiddleware = session({
   secret: process.env.SESSION_MIDDLEWARE_SECRET,
   resave: false,

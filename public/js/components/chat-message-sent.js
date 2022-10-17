@@ -21,10 +21,6 @@ customElements.define(
   class extends HTMLElement {
     #sender;
 
-    /**
-     * Create a chatroom choice.
-     *
-     */
     constructor() {
       super();
 
@@ -32,7 +28,6 @@ customElements.define(
         template.content.cloneNode(true)
       );
 
-      // Selectors.
       this.#sender = this.shadowRoot.querySelector("#sender");
     }
 

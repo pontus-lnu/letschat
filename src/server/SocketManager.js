@@ -87,7 +87,6 @@ export default class SocketManager {
         .allSockets();
       console.log(matchingSockets);
       if (matchingSockets.size < 2) {
-        // Tell other users that we've connected
         socket.broadcast.emit("user connected", {
           socketId: socket.socketId,
           userId: socket.userId,
@@ -95,7 +94,6 @@ export default class SocketManager {
         });
       }
 
-      // Get list of all active users
       const users = [];
       for (let [id, s] of this.#io.of("/").sockets) {
         let userExists = false;
