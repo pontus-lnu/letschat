@@ -148,7 +148,7 @@ this.#addEventHandlers();
 ```
 
 Denna kod är i konstruktorn.
-Efter konstruktorn kommer dessa samlande, funktioner på abstraktionsnivå efter varandra.
+Efter konstruktorn kommer dessa funktioner på av hög abstraktionsnivå efter varandra.
 
 Jag tycker själv inte att vertikal närhet är det viktigaste när det kommer till kodkvalitet. Då vill jag hellre ha att all kod är formatterad på samma sätt och har rätt indentering.
 
