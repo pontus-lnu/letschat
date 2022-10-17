@@ -1,4 +1,4 @@
-This is a chatapplication using websockets and. Data encrypted at rest using pntscrypt.
+This is a chatapplication. It's using websockets and data is encrypted at rest using pntscrypt.
 
 # Demo
 
