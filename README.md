@@ -19,6 +19,8 @@ You need to install postgress in order to use Letschat. Here's an example how to
 
 `docker run --name letschat -e POSTGRES_PASSWORD=019bf39f5ba6bc62505e983a2bc006fe -p 5432:5432 -d postgres`
 
+Letschat expects Postgres to be listening on port 5432.
+
 ### Environmental variables
 
 We expect 3 environmental variables to be set for database connection to work:
