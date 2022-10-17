@@ -9,7 +9,9 @@ import passport from "passport";
 import morgan from "morgan";
 import http from "node:http";
 import SocketManager from "./server/SocketManager.js";
+import * as dotenv from "dotenv";
 
+dotenv.config();
 const app = express();
 app.use(helmet());
 app.use(express.static("public"));
@@ -23,7 +25,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(morgan("dev"));
 app.set("trust proxy", 1); // trust first proxy
 const sessionMiddleware = session({
-  secret: "9cf45dd8c9a86af0659f82eaa070b9ec",
+  secret: process.env.SESSION_MIDDLEWARE_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false },
