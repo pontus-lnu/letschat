@@ -76,7 +76,6 @@ customElements.define(
 
     #onSession = () => {
       this.#socket.on("session", ({ sessionId, userId, username }) => {
-        console.log("session established", sessionId);
         this.#socket.auth = { sessionId };
         localStorage.setItem("sessionId", sessionId);
         this.#socket.userId = userId;
@@ -86,7 +85,6 @@ customElements.define(
 
     #onUsers = () => {
       this.#socket.on("users", (users) => {
-        console.log("users", users);
         for (const user of users) {
           if (this.#isMyself(user.userId)) {
             continue;
@@ -100,7 +98,6 @@ customElements.define(
 
     #onUserConnect = () => {
       this.#socket.on("user connected", (user) => {
-        console.log("user connected", user);
         if (this.#isMyself(user.userId)) {
           return;
         }
@@ -112,7 +109,6 @@ customElements.define(
 
     #onUserDisconnect = () => {
       this.#socket.on("user disconnected", (userId) => {
-        console.log("user disconnected", userId);
         this.#userList.dispatchEvent(
           new CustomEvent("lc-remove-user", { detail: { userId: userId } })
         );
@@ -158,7 +154,6 @@ customElements.define(
       if (this.#selectedUser == {}) {
         return;
       }
-      console.log("sending message to", this.#selectedUser);
       this.#socket.emit("private message", {
         content: textToSend,
         to: this.#selectedUser.userId,

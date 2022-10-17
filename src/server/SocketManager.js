@@ -39,9 +39,7 @@ export default class SocketManager {
         return next(new Error("Unauthorized"));
       }
       const sessionId = socket.handshake.auth.sessionId;
-      console.log("sessionId", sessionId);
       if (sessionId) {
-        console.log("grabbing session from store");
         const session = this.#sessionStore.findSession(sessionId);
         if (session) {
           socket.sessionId = sessionId;
@@ -69,23 +67,13 @@ export default class SocketManager {
         username: socket.username,
       });
 
-      console.log(socket.username, "connected!");
       const numberOfUsers = this.#io.of("/").sockets.size;
-      console.log(numberOfUsers, " user(s) connected.");
 
-      console.log(
-        socket.username,
-        "joining socket",
-        socket.userId,
-        "session",
-        socket.sessionId
-      );
       socket.join(socket.userId.toString());
 
       const matchingSockets = await this.#io
         .in(socket.userId.toString())
         .allSockets();
-      console.log(matchingSockets);
       if (matchingSockets.size < 2) {
         socket.broadcast.emit("user connected", {
           socketId: socket.socketId,
@@ -117,7 +105,6 @@ export default class SocketManager {
       socket.emit("users", users);
 
       socket.on("private message", async ({ content, to }) => {
-        console.log("private messages on server", to, content);
         const newMessage = await this.#messageModel.createMessage(
           socket.userId,
           to,
@@ -134,11 +121,9 @@ export default class SocketManager {
       });
 
       socket.on("disconnect", async () => {
-        console.log(numberOfUsers, " user(s) connected.");
         const matchingSockets = await this.#io
           .in(socket.userId.toString())
           .allSockets();
-        console.log("matching sockets", matchingSockets);
         const isDisconnected = matchingSockets.size === 0;
         if (isDisconnected) {
           socket.broadcast.emit("user disconnected", socket.userId);
@@ -146,7 +131,6 @@ export default class SocketManager {
       });
 
       socket.on("get messages", async ({ user1, user2 }) => {
-        console.log("getting messages");
         const getMessagesResponse = await this.#messageModel.getMessages(
           user1,
           user2
@@ -160,7 +144,6 @@ export default class SocketManager {
             timestamp: message.getTimestamp(),
           });
         });
-        console.log(messagesToEmit);
         socket.emit("messages", messagesToEmit);
       });
     });

@@ -54,7 +54,6 @@ customElements.define(
 
     #addUser = (event) => {
       const { userId, username } = event.detail;
-      console.log("create", userId, username);
       const newUser = document.createElement("chat-user");
       newUser.setAttribute("userid", userId);
       newUser.setAttribute("username", username);
@@ -65,7 +64,6 @@ customElements.define(
     };
 
     #removeUser = (event) => {
-      console.log(event);
       const { userId } = event.detail;
       const currentUsers = this.#userList.querySelectorAll("chat-user");
       currentUsers.forEach((user) => {
